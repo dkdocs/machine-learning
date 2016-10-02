@@ -30,29 +30,45 @@ fprintf('Loading and Visualizing Data ...\n')
 % Load from ex5data1: 
 % You will have X, y, Xval, yval, Xtest, ytest in your environment
 trainData = load ('data_train.txt');
-valData = load ('data_val.txt');
-testData = load('data_test.txt');
-X= trainData(:,1:2); 
- y=trainData(:,3);
- X_val=valData(:,1:2);
- y_val=valData(:,3);
-X_test=testData(:,1:2);
-y_test=testData(:,3);
+% valData = load ('data_val.txt');
+% testData = load('data_test.txt');
+
+
+trainData =  trainData(randperm( length(trainData)),:)
+
+
+X= trainData(1:1440,1:3); 
+ y=trainData(1:1440,4);
+ X_val=trainData(1440:1920,1:3);
+ y_val=trainData(1440:1920,4);
+X_test=trainData(1920:2400,1:3);
+y_test=trainData(1920:2400,4);
+%conversion
+% A=24*60;
+% X = X.*A;
+% y= y.*A;
+% X_val=X_val.*A;
+% y_val=y_val.*A;
+% X_test= X_test.*A;
+% y_test=y_test.*A;
 
 % m = Number of examples
 m_train = size(y,1);
 m_val=size(y_val,1);
-m_test = size(y_test,1);
+m_test = size(y_test,1);  
 
 
-[X mu sigma] = featureNormalize(X);
+% [X mu sigma] = featureNormalize(X);
+
+% X_test = (X_test - mu)./sigma;
+% X_val = (X_val - mu)./sigma;
 % [X_val mu_val sigma_val] = featureNormalize(X_val);
 % [X_test mu_test sigma_test] = featureNormalize(X_test);
 
-% Plot training data
+%Plot training data
 % plot(X, y, 'rx', 'MarkerSize', 10, 'LineWidth', 1.5);
-% xlabel('Change in water level (x)');
-% ylabel('Water flowing out of the dam (y)');
+% xlabel('Preparation time');
+% ylabel('Estimated time');
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
@@ -62,10 +78,10 @@ pause;
 %  regression. 
 %
 
-theta = [1 ; 1; 1];
+theta = [1 ; 1; 1; 1];
 J = linearRegCostFunction([ones(m_train, 1) X], y, theta, 1);
 
-fprintf('Cost at theta = [1 ; 1; 1]: %f\n', J);
+fprintf('Cost at theta = [1 ; 1; 1; 1]: %f\n', J);
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
@@ -75,11 +91,11 @@ pause;
 %  regression.
 %
 
-theta = [1 ; 1; 1];
+theta = [1 ; 1; 1; 1];
 [J, grad] = linearRegCostFunction([ones(m_train, 1) X], y, theta, 1);
 
-fprintf(['Gradient at theta = [1 ; 1; 1]:  [%f; %f;%f] ' '\n'], ...
-         grad(1), grad(2), grad(3));
+fprintf(['Gradient at theta = [1 ; 1; 1; 1]:  [%f; %f; %f; %f] ' '\n'], ...
+         grad(1), grad(2), grad(3), grad(4));
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
@@ -96,15 +112,20 @@ pause;
 
 %  Train linear regression with lambda = 0
 lambda = 0;
-[theta] = trainLinearReg([ones(m_train, 1) X], y, lambda);
+[theta] = trainLinearReg([ones(m_train, 1) X], y, lambda)
 
-%  Plot fit over the data
+ %Plot fit over the data
 % plot(X, y, 'rx', 'MarkerSize', 10, 'LineWidth', 1.5);
-% xlabel('Change in water level (x)');
-% ylabel('Water flowing out of the dam (y)');
+% xlabel('Preparation time');
+% ylabel('Estimated time');
 % hold on;
-% plot(X, [ones(m, 1) X]*theta, '--', 'LineWidth', 2)
+% plot(X, [ones(m_train, 1) X]*theta, '--', 'LineWidth', 2)
 % hold off;
+% X_test = [ones(m_test,1) X_test];
+% Y_test = X_test*theta;
+% error_test = y-Y_test;
+
+
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
@@ -128,7 +149,7 @@ title('Learning curve for linear regression')
 legend('Train', 'Cross Validation')
 xlabel('Number of training examples')
 ylabel('Error')
-axis([0 13 0 150])
+axis([0 1440 0 300])
 
 fprintf('# Training Examples\tTrain Error\tCross Validation Error\n');
 % for i = 1:m_train
@@ -148,16 +169,16 @@ p = 8;
 % Map X onto Polynomial Features and Normalize
 X_poly = polyFeatures(X, p);
 [X_poly, mu, sigma] = featureNormalize(X_poly);  % Normalize
-X_poly = [ones(m, 1), X_poly];                   % Add Ones
+X_poly = [ones(m_train, 1), X_poly];                   % Add Ones
 
 % Map X_poly_test and normalize (using mu and sigma)
-X_poly_test = polyFeatures(Xtest, p);
+X_poly_test = polyFeatures(X_test, p);
 X_poly_test = bsxfun(@minus, X_poly_test, mu);
 X_poly_test = bsxfun(@rdivide, X_poly_test, sigma);
 X_poly_test = [ones(size(X_poly_test, 1), 1), X_poly_test];         % Add Ones
 
 % Map X_poly_val and normalize (using mu and sigma)
-X_poly_val = polyFeatures(Xval, p);
+X_poly_val = polyFeatures(X_val, p);
 X_poly_val = bsxfun(@minus, X_poly_val, mu);
 X_poly_val = bsxfun(@rdivide, X_poly_val, sigma);
 X_poly_val = [ones(size(X_poly_val, 1), 1), X_poly_val];           % Add Ones
@@ -184,24 +205,25 @@ lambda = 0;
 figure(1);
 plot(X, y, 'rx', 'MarkerSize', 10, 'LineWidth', 1.5);
 plotFit(min(X), max(X), mu, sigma, theta, p);
-xlabel('Change in water level (x)');
-ylabel('Water flowing out of the dam (y)');
+xlabel('Preparation time');
+ylabel('Estimated time');
+axis([0 600 0 200])
 title (sprintf('Polynomial Regression Fit (lambda = %f)', lambda));
 
 figure(2);
 [error_train, error_val] = ...
-    learningCurve(X_poly, y, X_poly_val, yval, lambda);
-plot(1:m, error_train, 1:m, error_val);
+    learningCurve(X_poly, y, X_poly_val, y_val, lambda);
+plot(1:m_train, error_train, 1:m_train, error_val);
 
 title(sprintf('Polynomial Regression Learning Curve (lambda = %f)', lambda));
 xlabel('Number of training examples')
 ylabel('Error')
-axis([0 13 0 100])
+axis([0 600 0 1000])
 legend('Train', 'Cross Validation')
 
 fprintf('Polynomial Regression (lambda = %f)\n\n', lambda);
 fprintf('# Training Examples\tTrain Error\tCross Validation Error\n');
-for i = 1:m
+for i = 1:m_train
     fprintf('  \t%d\t\t%f\t%f\n', i, error_train(i), error_val(i));
 end
 
