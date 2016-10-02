@@ -9,13 +9,13 @@ fprintf('Loading data ...\n');
 
 %% Load Data
 data = load('nitin.txt');
-X = data(:, 1:2);
-y = data(:, 3);
+X = data(:, 1:3);
+y = data(:, 4);
 m = length(y);
 
 % Print out some data points
-fprintf('First 10 examples from the dataset: \n');
-fprintf(' x = [%.0f %.0f], y = %.0f \n', [X(1:10,:) y(1:10,:)]');
+% fprintf('First 10 examples from the dataset: \n');
+% fprintf(' x = [%.0f %.0f], y = %.0f \n', [X(1:10,:) y(1:10,:)]');
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
@@ -25,7 +25,7 @@ pause;
 fprintf('Normalizing Features ...\n');
 
 [X mu sigma] = featureNormalize(X);
-% Add intercept term to X
+% % Add intercept term to X
 X = [ones(m, 1) X];
 
 
@@ -57,10 +57,10 @@ fprintf('Running gradient descent ...\n');
 
 % Choose some alpha value
 alpha = 0.03;
-num_iters = 400;
+num_iters = 100;
 
 % Init Theta and Run Gradient Descent 
-theta = zeros(3, 1);
+theta = zeros(4, 1);
 [theta, J_history] = gradientDescentMulti(X, y, theta, alpha, num_iters);
 
 % Plot the convergence graph
@@ -78,11 +78,11 @@ fprintf('\n');
 % ====================== YOUR CODE HERE ======================
 % Recall that the first column of X is all-ones. Thus, it does
 % not need to be normalized.
-x1= (0.000055776-mu)/sigma;
-x2 = (0.0077930957-mu)/sigma;
-x= [1, x1, x2];
+% x1= (0.000055776-mu)/sigma;
+% x2 = (0.0077930957-mu)/sigma;
+% x= [1, x1, x2];
 
-price = sum(x*theta); % You should change this
+% price = sum(x*theta); % You should change this
 
 
 % ============================================================

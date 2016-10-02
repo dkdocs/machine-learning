@@ -27,9 +27,9 @@ sigma = zeros(1, size(X, 2));
 %       
 
 
-% mu = mean(X);
-% sigma = std(X);
-% X_norm = (X .- mu)./sigma;
+mu = mean(X);
+sigma = std(X);
+X_norm = (X .- mu)./sigma;
 % X_val_norm = (X_val.-mu)/.sigma;
 % X_test_norm = (X_test.-mu)./sigma;
 
